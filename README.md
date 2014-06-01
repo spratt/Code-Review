@@ -8,7 +8,7 @@ comment threads.
 Code Review comprises three major components:
 
 * The "server" is a Python/Bottle/uWSGI server. It does very little work, mostly
-  acting as an interface to a Redis data structure server.
+  acting as an interface to the SQL database.
 * The "client" is the web front end, running in a user's browser. It displays
   and allows editing text with CodeMirror. Several common web libraries,
   including jQuery and Bootstrap, make coding the user interface easier.
