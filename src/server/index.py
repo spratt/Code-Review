@@ -38,7 +38,26 @@ def log_request():
 @app.get('/do/codeByID')
 @app.get('/do/code/<id>')
 def get_code_by_id(id = None):
-    return HTTPResponse(status = 501) # not implemented
+    if id == None:
+        id = request.query.get('id')
+    if id == None:
+        abort(400)
+    try:
+        session = Session()
+        found = session.query(Code).filter(Code.id == int(id)).first()
+        if found == None:
+            abort(404)
+    except:
+        exctype, value = sys.exc_info()[:2]
+        logging.info('Error adding new code')
+        logging.info('exception type:  {}'.format(exctype))
+        logging.info('exception value: {}'.format(value))
+        abort(500, 'Error adding new code')
+    return json.dumps({
+        'id' : found.id,
+        'text' : found.text,
+        'lang' : found.lang
+    })
 
 @app.get('/do/commentsOnLine')
 @app.get('/do/code/<id>/comments/<line>')
@@ -60,9 +79,13 @@ def get_anticsrf():
 def add_code():
     text = request.forms.get('text')
     lang = request.forms.get('lang')
-    if text == None or lang == None:
+    if text == None:
         abort(400, json.dumps({
-            'error' : 'Attribute text or lang not provided'
+            'error' : 'Attribute text not provided'
+        }))
+    if lang == None:
+        abort(400, json.dumps({
+            'error' : 'Attribute lang not provided'
         }))
     new_code = Code(text = text, lang = lang)
     try:
