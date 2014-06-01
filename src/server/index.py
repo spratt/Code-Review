@@ -5,6 +5,7 @@ import logging
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from models.code import Code
+from models.comment import Comment
 import json
 
 ######################################################################
@@ -25,6 +26,8 @@ logging.info('Connecting to db {}'.format(app.config['db.con-string']))
 # Create tables if not already present
 from models.code import Base as CodeBase
 CodeBase.metadata.create_all(engine)
+from models.comment import Base as CommentBase
+CommentBase.metadata.create_all(engine)
 
 ######################################################################
 # Request logging
@@ -40,11 +43,13 @@ def log_request():
 def get_code_by_id(id = None):
     if id == None:
         id = request.query.get('id')
-    if id == None:
+    try:
+        id = int(id)
+    except:
         abort(400)
     try:
         session = Session()
-        found = session.query(Code).filter(Code.id == int(id)).first()
+        found = session.query(Code).filter(Code.id == id).first()
         if found == None:
             abort(404)
     except:
@@ -102,7 +107,56 @@ def add_code():
 
 @app.post('/do/newcomment')
 def add_comment():
-    return HTTPResponse(status = 501) # not implemented
+    code_id = request.forms.get('code_id')
+    text = request.forms.get('text')
+    line_start = request.forms.get('line_start')
+    line_end = request.forms.get('line_end')
+    diffs = request.forms.get('diffs')
+    if code_id == None:
+        abort(400, json.dumps({
+            'error' : 'Attribute code_id not provided'
+        }))
+    if text == None:
+        abort(400, json.dumps({
+            'error' : 'Attribute text not provided'
+        }))
+    if diffs == None:
+        abort(400, json.dumps({
+            'error' : 'Attribute diffs not provided'
+        }))
+    try:
+        line_start = int(line_start)
+    except:
+        abort(400, json.dumps({
+            'error' : 'Attribute line_start not a valid integer'
+        }))
+    try:
+        line_end = int(line_end)
+    except:
+        abort(400, json.dumps({
+            'error' : 'Attribute line_start not a valid integer'
+        }))
+    try:
+        session = Session()
+        found = session.query(Code).filter(Code.id == code_id).first()
+        if found == None:
+            abort(404)
+        new_comment = Comment(
+            code_id = code_id,
+            text = text,
+            line_start = line_start,
+            line_end = line_end,
+            diffs = diffs
+        )
+        session.add(new_comment)
+        session.commit()
+    except:
+        exctype, value = sys.exc_info()[:2]
+        logging.info('Error adding new comment')
+        logging.info('exception type:  {}'.format(exctype))
+        logging.info('exception value: {}'.format(value))
+        abort(500, 'Error adding new comment')
+    return json.dumps({'id' : new_comment.id})
 
 @app.post('/do/login')
 def login():
@@ -114,6 +168,3 @@ def logout():
 
 ######################################################################
 logging.info('Server started')
-
-
-
