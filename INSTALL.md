@@ -13,18 +13,21 @@ Requirements:
 * pip (1.5.4)
 * bottle (0.12.7)
 * uWSGI (2.0.4)
+* SQLAlchemy (0.9.4)
 
 Installation Instructions:
 
-1. Clone the repo.
-2. cd to the root of the cloned repo dir.
-3. cd src/server
-4. virtualenv develop
-5. pip install -U bottle
-6. pip install -U uwsgi
-7. source develop/bin/activate
-8. cd ../..
-9. bin/start.sh
+1.  Clone the repo.
+2.  cd to the root of the cloned repo dir.
+3.  cd src/server
+4.  virtualenv develop
+5.  pip install -U bottle
+6.  pip install -U uwsgi
+7.  pip install -U sqlalchemy
+8.  source develop/bin/activate
+9.  cd ../..
+10. bin/install_client.sh
+11. bin/start.sh
 
 This will start a web server running on port 8000 that serves the static files
 and the dynamic content.
