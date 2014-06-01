@@ -7,6 +7,7 @@ class Comment(Base):
     __tablename__ = 'comments'
     
     id = Column(Integer, Sequence('comment_id_seq'), primary_key=True)
+    user = Column(String, default='Anonymous')
     code_id = Column(String)
     text = Column(String)
     line_start = Column(Integer)
@@ -16,6 +17,7 @@ class Comment(Base):
     def getDict(self):
         return {
             'id' : int(self.id),
+            'user' : str(self.user),
             'code_id' : str(self.code_id),
             'text' : str(self.text),
             'line_start' : int(self.line_start),
