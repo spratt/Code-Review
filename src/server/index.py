@@ -65,9 +65,32 @@ def get_code_by_id(id = None):
     })
 
 @app.get('/do/commentsOnLine')
-@app.get('/do/code/<id>/comments/<line>')
-def get_comments(id = None, line = None):
-    return HTTPResponse(status = 501) # not implemented
+@app.get('/do/code/<code_id>/comments/<line>')
+def get_comments(code_id = None, line = None):
+    if code_id == None:
+        code_id = request.query.get('code_id')
+    if line == None:
+        line = request.query.get('line')
+    try:
+        code_id = int(code_id)
+        line = int(line)
+    except:
+        abort(400)
+    try:
+        session = Session()
+        comments = session.query(Comment).filter(
+            Comment.code_id == code_id,
+            Comment.line_start == line
+        ).all()
+        returnarr = [c.getDict() for c in comments]
+    except:
+        exctype, value = sys.exc_info()[:2]
+        logging.info('Error getting comments on line')
+        logging.info('exception type:  {}'.format(exctype))
+        logging.info('exception value: {}'.format(value))
+        abort(500, 'Error getting comments on line')
+    return json.dumps(returnarr)
+
 
 @app.get('/do/commentCount')
 @app.get('/do/code/<code_id>/comments/count')
@@ -88,10 +111,10 @@ def count_comments(code_id = None):
             returnob[line] = count
     except:
         exctype, value = sys.exc_info()[:2]
-        logging.info('Error adding new code')
+        logging.info('Error getting comment counts')
         logging.info('exception type:  {}'.format(exctype))
         logging.info('exception value: {}'.format(value))
-        abort(500, 'Error adding new code')
+        abort(500, 'Error getting comment counts')
     return json.dumps(returnob)
 
 @app.get('/do/anticsrf')
