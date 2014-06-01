@@ -7,43 +7,27 @@ Development
 Requirements:
 (tested versions appear in parentheses)
 
-* unix (OS X 10.6.8, OS X 10.8.2, Fedora 18, Ubuntu 12.10)
-* node (v0.10.4)
-* npm (1.2.11)
-* node-gyp (v0.8.4)
-* redis (2.6.12)
-* gcc (4.7.2)
-* GNU Wget (1.14)
-
+* unix (OS X 10.9.3)
+* Python (3.3.5)
+* virtualenv (1.11.4)
+* pip (1.5.4)
+* bottle (0.12.7)
+* uWSGI (2.0.4)
 
 Installation Instructions:
 
-1. open a terminal
-2. `git clone --recurse-submodules git@github.com:CarletonU-COMP2406-W2013/Steamed-Pears.git CodeReview`
-3. cd into `CodeReview`
-4. Run `bin/install_server.sh`
+1. Clone the repo.
+2. cd to the root of the cloned repo dir.
+3. cd src/server
+4. virtualenv develop
+5. pip install -U bottle
+6. pip install -U uwsgi
+7. source develop/bin/activate
+8. cd ../..
+9. bin/start.sh
 
-This will clone the project into a folder and initialize its git submodules.
-
-
-Usage Instructions:
-
-1. cd into CodeReview, the root directory of the project.
-2. Run `bin/start.sh` 
-
-Now you should be able to access the server running on localhost:8080.
-
-If you would like to stop the server, follow the above instructions
-but instead run bin/stop.sh as the final step.
-
-If you would like to restart the server, simply run bin/start.sh again.
-
-If something has gone horribly wrong, follow the above instructions
-but instead run bin/reset_dev.sh as the final step.  WARNING!!!  This
-will destroy your development database and delete the locally
-installed npm modules.  This is the best way to bring your
-installation back to a known state, but you will lose all the data in
-your copy of the application.
+This will start a web server running on port 8000 that serves the static files
+and the dynamic content.
 
 
 Production
@@ -52,39 +36,12 @@ Production
 Requirements:
 
 * unix (Server uses CentOS release 5.8 (Final))
-* node (Server uses v0.10.4)
-* nginx (Server uses ??)
-* Redis (Server uses 2.6.12)
-
+* Python 3
+* virtualenv
+* pip
+* bottle
+* uwsgi
 
 Instructions:
 
-(Assuming ssh'd into server, pulled latest repo and reading this.)
-
-1. cd to root directory (CodeReview)
-2. Be sure to copy the client files into your static http folder.
-3. Run `bin/install_server.sh`
-4. Run `bin/build_production_all.sh`
-5. Run `bin/start.sh --prod`
-
-Note that for steps 3 and 5 you may specify a PREFIX which is a prefix
-for installing files.  For example, binary executables will be
-installed in $PREFIX/bin
-  e.g.  `PREFIX="/home/steamed-pears" bin/install_server.sh`
-
-Note that for steps 3 and 4 you may specify a TMPDIR (or whatever your 
-copy of `mktemp` uses) in which to store temporary files.
-  e.g.  `TMPDIR="/home/steamed-pears/tmp" bin/install_server.sh`
-
-Note that for step 4 you may specify a TARGET which is where the
-production files will be built.
-  e.g.  `TARGET="~/webapps/cr_front" bin/build_production_all.sh`
-
-Note that compiling Redis (in step 3) may fail with old versions of gcc (we
-found it with gcc 4.1). To fix this, run
-
-    $ export CFLAGS=-march=i686
-
-and try again.
-
-vim: set softtabstop=2 shiftwidth=2 tabstop=8 expandtab textwidth=80:
+TODO
