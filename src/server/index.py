@@ -1,17 +1,37 @@
 import sys
 import bottle
-from bottle import HTTPResponse
+from bottle import HTTPResponse, request
 import logging
 from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from models.code import Code
+import json
 
 ######################################################################
 # Configuration
-conf = sys.argv[1]
+config_file = '../../etc/{}.ini'.format(sys.argv[1])
 app = application = bottle.Bottle()
-app.config.load_config('../../etc/{}.ini'.format(conf))
-logging.basicConfig(filename=app.config['code-review.logfile'],
+app.config.load_config(config_file)
+logging.basicConfig(format='%(asctime)s %(message)s',
+                    filename=app.config['code-review.logfile'],
                     level=logging.DEBUG)
 engine = create_engine(app.config['db.con-string'], echo=True)
+Session = sessionmaker(bind = engine)
+logging.info('Loaded configuration from {}'.format(config_file))
+logging.info('Logging to {}'.format(app.config['code-review.logfile']))
+logging.info('Connecting to db {}'.format(app.config['db.con-string']))
+
+######################################################################
+# Create tables if not already present
+from models.code import Base as CodeBase
+CodeBase.metadata.create_all(engine)
+
+######################################################################
+# Request logging
+@app.hook('before_request')
+def log_request():
+    logging.info('{} {}'.format(request.method, request.path))
+    return True
 
 ######################################################################
 # GET Routes
@@ -38,20 +58,44 @@ def get_anticsrf():
 # POST Routes
 @app.post('/do/newcode')
 def add_code():
-    return HTTPResponse(status = 501) # not implemented
+    text = request.forms.get('text')
+    lang = request.forms.get('lang')
+    if text == None or lang == None:
+        abort(400, json.dumps({
+            'error' : 'Attribute text or lang not provided'
+        }))
+    try:
+        session = Session()
+    except:
+        logging.info('Error connecting to database')
+        abort(500, 'Error connecting to database')
+    new_code = Code(text = text, lang = lang)
+
+    try:
+        session.add(new_code)
+        session.commit()
+    except:
+        exctype, value = sys.exc_info()[:2]
+        logging.info('Error adding new code')
+        logging.info('exception type:  {}'.format(exctype))
+        logging.info('exception value: {}'.format(value))
+        abort(500, 'Error adding new code')
+    return json.dumps({'id' : new_code.id})
 
 @app.post('/do/newcomment')
-def add_code():
+def add_comment():
     return HTTPResponse(status = 501) # not implemented
 
 @app.post('/do/login')
-def add_code():
+def login():
     return HTTPResponse(status = 501) # not implemented
 
 @app.post('/do/logout')
-def add_code():
+def logout():
     return HTTPResponse(status = 501) # not implemented
 
 ######################################################################
-if __name__ == '__main__':
-    bottle.run(app, port=8080)
+logging.info('Server started')
+
+
+
