@@ -6,8 +6,9 @@ Later reviewers can see previous comments, too, and comment on those, forming
 comment threads.
 
 Code Review comprises three major components:
-* The "server" is a Node.js server, with Connect middleware. It does very little
-  work, mostly acting as an interface to a Redis data structure server.
+
+* The "server" is a Python/Bottle/uWSGI server. It does very little work, mostly
+  acting as an interface to a Redis data structure server.
 * The "client" is the web front end, running in a user's browser. It displays
   and allows editing text with CodeMirror. Several common web libraries,
   including jQuery and Bootstrap, make coding the user interface easier.
