@@ -64,14 +64,9 @@ def add_code():
         abort(400, json.dumps({
             'error' : 'Attribute text or lang not provided'
         }))
+    new_code = Code(text = text, lang = lang)
     try:
         session = Session()
-    except:
-        logging.info('Error connecting to database')
-        abort(500, 'Error connecting to database')
-    new_code = Code(text = text, lang = lang)
-
-    try:
         session.add(new_code)
         session.commit()
     except:
