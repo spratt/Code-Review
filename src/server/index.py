@@ -2,7 +2,7 @@ import sys
 import bottle
 from bottle import HTTPResponse, request
 import logging
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, func
 from sqlalchemy.orm import sessionmaker
 from models.code import Code
 from models.comment import Comment
@@ -70,9 +70,29 @@ def get_comments(id = None, line = None):
     return HTTPResponse(status = 501) # not implemented
 
 @app.get('/do/commentCount')
-@app.get('/do/code/<id>/comments/count')
-def count_comments(id = None):
-    return HTTPResponse(status = 501) # not implemented
+@app.get('/do/code/<code_id>/comments/count')
+def count_comments(code_id = None):
+    if code_id == None:
+        code_id = request.query.get('code_id')
+    try:
+        code_id = int(code_id)
+    except:
+        abort(400)
+    try:
+        session = Session()
+        counts = session.query(
+            Comment.line_start, func.count(Comment.id)).filter(
+                Comment.code_id == code_id).group_by(Comment.line_start).all()
+        returnob = {}
+        for line, count in counts:
+            returnob[line] = count
+    except:
+        exctype, value = sys.exc_info()[:2]
+        logging.info('Error adding new code')
+        logging.info('exception type:  {}'.format(exctype))
+        logging.info('exception value: {}'.format(value))
+        abort(500, 'Error adding new code')
+    return json.dumps(returnob)
 
 @app.get('/do/anticsrf')
 def get_anticsrf():
